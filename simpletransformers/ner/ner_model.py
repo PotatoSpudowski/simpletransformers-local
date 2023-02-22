@@ -149,6 +149,7 @@ class NERModel:
         self,
         model_type,
         model_name,
+        model_path,
         labels=None,
         weight=None,
         args=None,
@@ -301,11 +302,11 @@ class NERModel:
         config_class, model_class, tokenizer_class = MODEL_CLASSES[model_type]
         if self.num_labels:
             self.config = config_class.from_pretrained(
-                model_name, num_labels=self.num_labels, **self.args.config
+                model_path, num_labels=self.num_labels, **self.args.config
             )
             self.num_labels = self.num_labels
         else:
-            self.config = config_class.from_pretrained(model_name, **self.args.config)
+            self.config = config_class.from_pretrained(model_path, **self.args.config)
             self.num_labels = self.config.num_labels
 
         self.config.id2label = self.id2label
@@ -359,11 +360,11 @@ class NERModel:
         else:
             if not self.args.quantized_model:
                 self.model = model_class.from_pretrained(
-                    model_name, config=self.config, **kwargs
+                    model_path, config=self.config, **kwargs
                 )
             else:
                 quantized_weights = torch.load(
-                    os.path.join(model_name, "pytorch_model.bin")
+                    os.path.join(model_path, "pytorch_model.bin")
                 )
                 self.model = model_class.from_pretrained(
                     None, config=self.config, state_dict=quantized_weights
@@ -401,7 +402,7 @@ class NERModel:
             )
         else:
             self.tokenizer = tokenizer_class.from_pretrained(
-                model_name, do_lower_case=self.args.do_lower_case, **kwargs
+                model_path, do_lower_case=self.args.do_lower_case, **kwargs
             )
 
         if self.args.special_tokens_list:
